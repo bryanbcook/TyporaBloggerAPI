@@ -1,0 +1,31 @@
+Set-StrictMode -Version 2.0
+
+# Get Functions
+$private = Get-ChildItem -Path (Join-Path $PSScriptRoot Private) -Include *.ps1 -File -Recurse
+$public = Get-ChildItem -Path (Join-Path $PSScriptRoot Public) -Include *.ps1 -File -Recurse
+
+# Dot source to scope
+# Private must be sourced first - usage in public functions during load
+($private + $public) | ForEach-Object {
+    try {
+        Write-Verbose "Loading $($_.FullName)"
+        . $_.FullName
+    }
+    catch {
+        Write-Warning $_.Exception.Message
+    }
+}
+
+$publicFunctions = $public | ForEach-Object { $_.Name.Replace(".ps1","") }
+Export-ModuleMember -Function $publicFunctions
+
+# ensure Tls12
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+$TyporaBloggerSession = [ordered]@{
+    CredentialCache = "$($env:USERPROFILE)\\.typorabloggerapi\\credentialcache.json"
+    AccessToken = $null
+    RefreshToken = $null
+    
+}
+New-Variable -Name TyporaBloggerSession -Value $TyporaBloggerSession -Scope Script -Force
