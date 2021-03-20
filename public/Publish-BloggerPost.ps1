@@ -42,5 +42,11 @@ Function Publish-BloggerPost
         labels = $labels
     }
 
-    Invoke-GApi -Uri $uri -Body ($body | ConvertTo-Json)
+    $body | ConvertTo-Json | Write-Verbose
+
+    $post = Invoke-GApi -Uri $uri -Body ($body | ConvertTo-Json)
+
+    $previewUrl = "https://www.blogger.com/blog/post/edit/preview/$blogId/$($post.id)"
+
+    Start-Process $previewUrl
 }
