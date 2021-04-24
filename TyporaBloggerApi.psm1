@@ -1,5 +1,9 @@
 Set-StrictMode -Version 2.0
 
+if (!(Get-Module powershell-yaml)) {
+    Import-Module powershell-yaml
+}
+
 # Get Functions
 $private = Get-ChildItem -Path (Join-Path $PSScriptRoot Private) -Include *.ps1 -File -Recurse
 $public = Get-ChildItem -Path (Join-Path $PSScriptRoot Public) -Include *.ps1 -File -Recurse
