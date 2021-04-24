@@ -1,3 +1,8 @@
+<#
+.SYNOPSIS
+Gets a list of Blogger Blogs associated to the user
+
+#>
 Function Get-BloggerBlogs
 {
     [CmdletBinding()]

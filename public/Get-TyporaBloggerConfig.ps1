@@ -1,4 +1,9 @@
-function Get-TyporaBloggerConfig
+<#
+.SYNOPSIS
+Obtains the current TyporaBlogger configuration for the session
+
+#>
+Function Get-TyporaBloggerConfig
 {
   @{
     Template = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($TyporaBloggerSession.PandocTemplate)

@@ -1,3 +1,14 @@
+<#
+.SYNOPSIS
+Convert a file to Markdown using Pandoc
+
+.PARAMETER File
+The file path of the markdown file
+
+.PARAMETER OutFile
+The resulting html. If this parameter is not specified an HTML file with the same name of the markdown file will be created.
+
+#>
 function ConvertTo-HtmlFromMarkdown
 {
     param(
@@ -6,7 +17,7 @@ function ConvertTo-HtmlFromMarkdown
         [string]$File,
 
         [Parameter(HelpMessage="File path to create")]
-        [ValidateScript({ Test-Path $_ -Include "*.html"})]
+        #[ValidateScript({ Test-Path $_ -Include "*.html" -PathType Container})]
         [string]$OutFile
     )
 

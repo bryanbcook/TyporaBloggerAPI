@@ -1,3 +1,33 @@
+<#
+.SYNOPSIS
+Initialize the local system to use Typora + Blogger together
+
+.DESCRIPTION
+This prepares your system to use Typora + Blogger together by obtaining an authtoken that is authorized to communicate with blogger.
+
+.PARAMETER clientId
+Google API Client ID. A default value is provided, but you can provide your own if you don't trust me.
+
+.PARAMETER clientSecret
+Google API Client Secret. A default value is provided, but you can provide your own if you don't trust me.
+
+.PARAMETER redirectUri
+The oAuth redirect URL specifed in the Google API Consent Form. 
+
+.PARAMETER code
+This is the auth code provided
+
+.EXAMPLE
+Initiate a login flow with Google
+
+    Initialize-TyporaBlogger
+
+.EXAMPLE
+After successfully logging in, copy the "code" query string parameter from the callback window
+
+    Initialize-TyporaBlogger -code <auth-code>
+
+#>
 Function Initialize-TyporaBlogger 
 {
     Param(
