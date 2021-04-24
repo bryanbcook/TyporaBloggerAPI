@@ -3,28 +3,28 @@ Function Publish-BloggerPost
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
-        [string]$blogid,
+        [string]$BlogId,
 
         [Parameter()]
-        [string]$postId,
+        [string]$PostId,
 
         [Parameter(Mandatory=$true)]
-        [string]$title,
+        [string]$Title,
 
         [Parameter(Mandatory=$true)]
-        [string]$content,
+        [string]$Content,
 
         [string[]]$labels,
 
         [switch]$Draft
     )
 
-    $uri = "https://www.googleapis.com/blogger/v3/blogs/$blogId/posts"
+    $uri = "https://www.googleapis.com/blogger/v3/blogs/$BlogId/posts"
 
     # if the postId exists, we're performing an update
-    if ($postId)
+    if ($PostId)
     {
-        $uri += "/$postId"
+        $uri += "/$PostId"
     }
     else {
         if ($Draft) {
@@ -35,10 +35,10 @@ Function Publish-BloggerPost
     $body = @{
         kind= "blogger#post"
         blog = @{
-            id = $blogId
+            id = $BlogId
         }
-        title = $title
-        content = $content
+        title = $Title
+        content = $Content
         labels = $labels
     }
 
@@ -46,7 +46,9 @@ Function Publish-BloggerPost
 
     $post = Invoke-GApi -Uri $uri -Body ($body | ConvertTo-Json)
 
-    $previewUrl = "https://www.blogger.com/blog/post/edit/preview/$blogId/$($post.id)"
+    $previewUrl = "https://www.blogger.com/blog/post/edit/preview/$BlogId/$($post.id)"
 
     Start-Process $previewUrl
+
+    return $post
 }
