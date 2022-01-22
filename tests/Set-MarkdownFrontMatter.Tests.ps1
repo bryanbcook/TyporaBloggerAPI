@@ -87,6 +87,7 @@ Describe 'Set-MarkdownFrontMatter' {
       # arrange
       $testFile = "TestDrive:\valid.md"
       $frontMatter = New-FrontMatter @("title: title value", "postid: 123")
+      $frontMatter += "# hello world"
       Set-Content -Path $testFile -Value $frontMatter
     }
 
@@ -104,6 +105,24 @@ Describe 'Set-MarkdownFrontMatter' {
       $lines[3].Trim() | Should -Be "three: `"3`""
       $lines[4].Trim() | Should -Be "four: `"4`""
       $lines[5] | Should -Be "---"
+    }
+
+    It "Shouldn't add additional whitespace after updating the frontmatter" {
+
+      # arrange
+      $length = (Get-Content -Path $testFile).Count
+
+      # act
+      $replace = [ordered]@{ one="1"; two="2"; }
+      Set-MarkdownFrontMatter -File $testFile -Replace $replace
+
+      # asert
+      $lines = (Get-Content -Path $testFile)
+      $lines[0] | Should -Be "---"
+      $lines[1].Trim() | Should -Be "one: `"1`""
+      $lines[2].Trim() | Should -Be "two: `"2`""
+      $lines[3] | Should -Be "---"
+      $lines.Count | Should -Be $length
     }
   }
 }

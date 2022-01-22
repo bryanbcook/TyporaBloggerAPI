@@ -18,7 +18,7 @@ Function Set-MarkdownFrontMatter
 
     # fetch file contents without the front-matter
     $content = Get-Content -Path $File -Raw
-    $content = $content -replace '(?smi)(---.*?)(?:---)',''
+    $content = ($content -replace '(?smi)(---.*?)(?:---)\r?\n?','').Trim()
     
     if ($PSBoundParameters["Update"]) {
       Write-Verbose "Updating FrontMatter in $File"
@@ -41,10 +41,7 @@ Function Set-MarkdownFrontMatter
       $frontMatter = $Replace
     }
 
-    $content = "---`n" + ($frontMatter | ConvertTo-Yaml) + "---`n" + $content
-
-    # fix additional multi-lines
-    $content = $content -replace '---`n`n','---`n'
+    $content = ("---`n" + ($frontMatter | ConvertTo-Yaml) + "---`n" + $content).Trim()
 
     if ($PSCmdlet.ShouldProcess("Update $File")) {
       Set-Content -Path $File -Value $content
