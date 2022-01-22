@@ -21,15 +21,18 @@ function ConvertTo-HtmlFromMarkdown
         [string]$OutFile
     )
 
+    # ensure that the file is an absolute path because pandoc.exe doesn't like powershell relative paths
+    $File = (Resolve-Path $File).Path
+
     # Use pandoc to convert the markdown to Html 
-    $pandocArgs =  "`{0}` " -f $File
+    $pandocArgs =  "`"{0}`" " -f $File
     $pandocArgs += "-f {0} " -f $TyporaBloggerSession.PandocMarkdownFormat
     $pandocArgs += "-t {0} " -f $TyporaBloggerSession.PandocHtmlFormat
 
     # add template and toc if template is available
     if (Test-Path $TyporaBloggerSession.PandocTemplate) {
-        Write-Verobse "Using template"
-        $pandocArgs += "--template {0} --toc " -f $TyporaBloggerSession.PandocTemplate
+        Write-Verbose "Using template"
+        $pandocArgs += "--template `"{0}`" --toc " -f $TyporaBloggerSession.PandocTemplate
     }
     # add additional command-line arguments
     if ($TyporaBloggerSession.PandocAdditionalArgs) {
@@ -43,7 +46,7 @@ function ConvertTo-HtmlFromMarkdown
         Write-Verbose "Using OutFile: $OutFile"
     }
 
-    $pandocArgs += "-o {0} " -f $OutFile
+    $pandocArgs += "-o `"{0}`" " -f $OutFile
 
     Write-Verbose ">> pandoc $($pandocArgs)"
     Start-Process pandoc -ArgumentList $pandocArgs -NoNewWindow -Wait
@@ -58,5 +61,8 @@ function ConvertTo-HtmlFromMarkdown
     $content = $content -replace '</code></pre>','</pre>'
 
     Set-Content -Path $OutFile -Value $content
+
+    Remove-Item $OutFile
+
     return $content
 }

@@ -26,7 +26,11 @@ function Set-CredentialCache
         New-Item -ItemType Directory -Path $parentFolder -Force
     }
 
-    Set-Content $TyporaBloggerSession.CredentialCache -Value ($cache | ConvertTo-Json)
+    Set-Content $TyporaBloggerSession.CredentialCache -Value ($cache | ConvertTo-Json) -Force
+
+    # reset previously loaded auth tokens / force reload + validation for next api call
+    $TyporaBloggerSession.AccessToken = $null
+    $TyporaBloggerSession.RefreshToken = $null
 }
 
 function Update-CredentialCache
