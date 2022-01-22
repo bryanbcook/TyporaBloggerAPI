@@ -26,9 +26,15 @@ Function Publish-MarkdownBloggerPost
 
   # grab the front matter
   $postInfo = Get-MarkdownFrontMatter -File $File
+
+  # TODO: Extension point to create additional metadata-file
+  # - eg: dynamically build a flickr header image from a url in the meta block
     
   # convert from markdown to html file
   $content = ConvertTo-HtmlFromMarkdown -File $File
+
+  # TODO: Extension point to apply corrections to HTML
+  # - eg: remove instances of <pre><code> from the content
 
   # construct args
   $postArgs = @{
@@ -44,7 +50,7 @@ Function Publish-MarkdownBloggerPost
   
   $post = Publish-BloggerPost @postArgs
 
-  # # update post id
+  # update post id
   $postInfo["postId"] = $post.id
   if ($Draft) {
     $postInfo["wip"] = $true

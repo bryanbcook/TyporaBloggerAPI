@@ -20,17 +20,23 @@ Function Publish-BloggerPost
     )
 
     $uri = "https://www.googleapis.com/blogger/v3/blogs/$BlogId/posts"
+    $method = "POST"
 
     # if the postId exists, we're performing an update
     if ($PostId)
     {
         $uri += "/$PostId"
-    }
-    else {
+        $method = "PUT"
+
+        if (-not $Draft) {
+            $uri += "?publish=true"
+        }
+
+    } else {
         if ($Draft) {
             $uri += "?isDraft=true"
         }
-    }
+    }   
 
     $body = @{
         kind= "blogger#post"
@@ -44,11 +50,16 @@ Function Publish-BloggerPost
 
     $body | ConvertTo-Json | Write-Verbose
 
-    $post = Invoke-GApi -Uri $uri -Body ($body | ConvertTo-Json)
+    $post = Invoke-GApi -Uri $uri -Body ($body | ConvertTo-Json) -Method $method
 
-    $previewUrl = "https://www.blogger.com/blog/post/edit/preview/$BlogId/$($post.id)"
+    $postUrl = `
+        if ($Draft) {
+            "https://www.blogger.com/blog/post/edit/preview/$BlogId/$($post.id)"
+        } else {
+            $post.url
+        }
 
-    Start-Process $previewUrl
+    Start-Process $postUrl
 
     return $post
 }

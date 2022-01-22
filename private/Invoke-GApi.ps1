@@ -1,6 +1,7 @@
 Function Invoke-GApi
 {
     param(
+        [Parameter(Mandatory)]
         [string]$uri,
 
         [string]$body,
@@ -11,18 +12,20 @@ Function Invoke-GApi
     # obtain the auth-header
     $headers = Get-AuthHeader
 
+    $invokeArgs = @{
+        Uri = $uri
+        Method = $method
+        ContentType = "application/json"
+        Headers = $headers
+    }
+
     if ($body) {
 
         if ($method -eq "GET") {
-            $method = "POST"
+            $invokeArgs.Method = "POST"
         }
-
-        Write-Verbose "body:`n$body"
-
-        Invoke-RestMethod -Uri $uri -Body $body -Method $method -ContentType "application/json" -Headers $headers
+        $invokeArgs.Body = $body
     }
-    else 
-    {
-        Invoke-RestMethod -Uri $uri -Method $method -ContentType "application/json" -Headers $headers
-    }
+
+    Invoke-RestMethod @invokeArgs
 }
