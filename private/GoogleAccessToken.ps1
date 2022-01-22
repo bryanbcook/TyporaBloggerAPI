@@ -22,7 +22,7 @@ function Get-GoogleAccessToken
 
     try {
 
-        Write-Host "Fetching Token..."
+        Write-Verbose "Fetching Access Token with short-lived expiry..."
 
         $requestUri = "https://www.googleapis.com/oauth2/v4/token"
 
@@ -51,6 +51,8 @@ function Update-GoogleAccessToken
     $body = "client_id=$clientId&client_secret=$clientSecret&refresh_token=$refreshToken&grant_type=refresh_token"
 
     $requestUri = "https://www.googleapis.com/oauth2/v4/token"
+
+    Write-Verbose "Upgrading token using refresh-token..."
 
     $tokens = Invoke-RestMethod -Uri $requestUri -Method POST -Body $body -ContentType "application/x-www-form-urlencoded"
 

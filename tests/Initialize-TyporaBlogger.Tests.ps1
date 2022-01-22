@@ -4,6 +4,12 @@ Describe "Initialize-TyporaBlogger" {
     Import-Module $PSScriptRoot\..\TyporaBloggerApi.psm1 -Force
   }
 
+  # Context "Try it" {
+  #   It "Should launch browser and authenticate" {
+  #     Initialize-TyporaBlogger
+  #   }
+  # }
+
   Context "User provides AuthCode" {
 
     BeforeEach {
@@ -12,6 +18,10 @@ Describe "Initialize-TyporaBlogger" {
         Mock Get-GoogleAccessToken { return @{ refresh_token = "refresh_token" } }
         # simulate valid offline token
         Mock Update-GoogleAccessToken { return @{ access_token = "access_token" } }
+        # simulate auth-flow in browser
+        Mock Wait-GoogleAuthApiToken { "simulatedcode" }
+        # prevent browser from being launched
+        Mock Start-Process { }
       }
     }
 
@@ -23,8 +33,9 @@ Describe "Initialize-TyporaBlogger" {
         $credentialCache = "TestDrive:\credentialcache.json"
         $TyporaBloggerSession.CredentialCache = $credentialCache
 
+
         # act
-        Initialize-TyporaBlogger -code "simulatedcode"
+        Initialize-TyporaBlogger
         
         # assert
         $credentials = Get-Content -Path $credentialCache | ConvertFrom-Json
@@ -43,7 +54,7 @@ Describe "Initialize-TyporaBlogger" {
         $TyporaBloggerSession.RefreshToken = "invalid"
 
         # act
-        Initialize-TyporaBlogger -code "simulatedcode"
+        Initialize-TyporaBlogger
         
         # assert
         $TyporaBloggerSession.AccessToken | Should -Be $null
