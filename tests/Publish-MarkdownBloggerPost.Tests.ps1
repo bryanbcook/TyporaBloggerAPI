@@ -103,22 +103,25 @@ wip: true
   Context "Publishing an update to existing post" {
 
     It "Should use post id when publishing" {
+      InModuleScope TyporaBloggerAPI {
       #arrange
-      $post = @"
+        $post = @"
 ---
 postId: "123456"
 ---
 # hello world
 "@
-      $testFile = "TestDrive:\dummy.md"
-      Set-Content $testFile -Value $post
-      Mock -ModuleName TyporaBloggerAPI Publish-BloggerPost -Verifiable -ParameterFilter { $PostId -eq "123456"} { return @{ id="123"}}
+        $testFile = "TestDrive:\dummy.md"
+        Set-Content $testFile -Value $post
+        Mock Publish-BloggerPost -Verifiable -ParameterFilter { $PostId -eq "123456"} { return @{ id="123"}}
 
-      #act
-      Publish-MarkdownBloggerPost -File $testFile
+        #act
+        Publish-MarkdownBloggerPost -File $testFile
 
-      #assert
-      Should -InvokeVerifiable
+        #assert
+        Should -InvokeVerifiable 
+
+      }
     }
   }
 
