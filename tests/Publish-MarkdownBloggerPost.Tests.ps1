@@ -3,9 +3,6 @@ Describe "Publish-MarkdownBloggerPost" {
 
     Import-Module $PSScriptRoot\_TestHelpers.ps1 -Force
 
-    # dummy result 
-    Mock Publish-BloggerPost {return @{ id="123"}}
-    
     $validFile = "TestDrive:\validfile.md"
     Set-MarkdownFile $validFile "# hello world"
     
@@ -13,8 +10,13 @@ Describe "Publish-MarkdownBloggerPost" {
   BeforeEach {
     Import-Module $PSScriptRoot\..\TyporaBloggerApi.psm1 -Force
 
-    # avoid pandoc for now
-    Mock ConvertTo-HtmlFromMarkdown { "<div>dummy</div>" }
+    # set up dummy results
+    InModuleScope TyporaBloggerAPI {
+      # avoid blogger api for now
+      Mock Publish-BloggerPost {return @{ id="123"}}
+      # avoid pandoc for now
+      Mock ConvertTo-HtmlFromMarkdown { return "<div>dummy</div>" }
+    }
   }
 
   Context "Blog Id Preference has not been set" {
@@ -35,13 +37,14 @@ Describe "Publish-MarkdownBloggerPost" {
 
     It "Should publish to blog when blog id is specified" {
       # arrange
-      Mock Publish-BloggerPost -Verifiable { return @{ id=123; } }
-      Mock Set-MarkdownFrontMatter -Verifiable {}
+      InModuleScope TyporaBloggerAPI {
+        Mock Set-MarkdownFrontMatter -Verifiable {}
+      }
 
       # act
       Publish-MarkdownBloggerPost -File $validFile -BlogId 1234
 
-      Should -InvokeVerifiable
+      Should -InvokeVerifiable      
     }
   }
 
@@ -59,6 +62,21 @@ Describe "Publish-MarkdownBloggerPost" {
       $result = Get-MarkdownFrontMatter -File $testFile
       $result['wip'] | Should -Not -BeNullOrEmpty
       $result.wip | Should -Be $true
+    }
+
+    It "Should set draft on blogger post" {
+      # arrange
+      $testFile = "TestDrive:\testfile.md"
+      Set-Content -Path $testFile -Value "# hello world"
+      InModuleScope TyporaBloggerApi {
+        Mock Publish-BloggerPost -ParameterFilter { $Draft -eq $true } { return @{ id=123 } }
+      }
+
+      # act
+      Publish-MarkdownBloggerPost -File $testFile -BlogId 1234 -Draft
+
+      #assert
+      Should -InvokeVerifiable
     }
   }
 
@@ -82,11 +100,34 @@ wip: true
     }
   }
 
+  Context "Publishing an update to existing post" {
+
+    It "Should use post id when publishing" {
+      #arrange
+      $post = @"
+---
+postId: "123456"
+---
+# hello world
+"@
+      $testFile = "TestDrive:\dummy.md"
+      Set-Content $testFile -Value $post
+      Mock -ModuleName TyporaBloggerAPI Publish-BloggerPost -Verifiable -ParameterFilter { $PostId -eq "123456"} { return @{ id="123"}}
+
+      #act
+      Publish-MarkdownBloggerPost -File $testFile
+
+      #assert
+      Should -InvokeVerifiable
+    }
+  }
+
   
   It "Should update front matter with postid after publishing" {
     # arrange
-    Mock Publish-BloggerPost { return New-BlogPost "post1" }
-
+    $blogPost = New-BlogPost "post1"
+    Mock -ModuleName TyporaBloggerAPI Publish-BloggerPost { return $blogPost }
+    
     # act
     Publish-MarkdownBloggerPost -File $validFile -BlogId "123"
 
