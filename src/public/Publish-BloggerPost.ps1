@@ -14,7 +14,7 @@ Function Publish-BloggerPost
         [Parameter(Mandatory=$true)]
         [string]$Content,
 
-        [string[]]$labels,
+        [string[]]$Labels,
 
         [switch]$Draft
     )
@@ -45,7 +45,7 @@ Function Publish-BloggerPost
         }
         title = $Title
         content = $Content
-        labels = $labels
+        labels = $Labels
     }
 
     $body | ConvertTo-Json | Write-Verbose

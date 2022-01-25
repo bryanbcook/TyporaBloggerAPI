@@ -125,6 +125,26 @@ postId: "123456"
     }
   }
 
+  It "Should set blog post labels based on tags in front-matter" {
+    # arrange
+
+    # add our tags to the file
+    $postInfo = Get-MarkdownFrontMatter -File $validFile
+    $postInfo.tags = @("PowerShell","Pester")
+    Set-MarkdownFrontMatter -File $validFile -Replace $postInfo
+
+    InModuleScope TyporaBloggerApi {
+      $tags = @("PowerShell","Pester")
+      Mock Publish-BloggerPost -Verifiable -ParameterFilter { $Labels -ne $null -and (-not (Compare-Object $Labels $tags))} { return @{ id="123"} }
+    }
+
+    # act
+    Publish-MarkdownBloggerPost -File $validFile -BlogId "123"
+
+    # assert
+    Should -InvokeVerifiable 
+  }
+
   
   It "Should update front matter with postid after publishing" {
     # arrange
